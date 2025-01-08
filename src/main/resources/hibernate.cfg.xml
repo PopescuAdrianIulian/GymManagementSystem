@@ -12,6 +12,7 @@
         <property name="hbm2ddl.auto">update</property>
         <mapping class="org.example.entities.Member"/>
         <mapping class="org.example.entities.Trainer"/>
+        <mapping class="org.example.entities.TrainingSession"/>
 
 
     </session-factory>

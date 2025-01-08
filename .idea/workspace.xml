@@ -4,12 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0216f41c-2083-42ec-a0d0-4aec0e4bab6e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="0216f41c-2083-42ec-a0d0-4aec0e4bab6e" name="Changes" comment="Al doilea commit!">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/entities/Member.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/entities/Member.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/entities/Trainer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/entities/Trainer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/util/GymCli.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/util/GymCli.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,8 +20,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="Exception" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -39,6 +40,9 @@
     &quot;accountId&quot;: &quot;d8050a5b-4ba4-4535-94ee-f86bf994d659&quot;
   }
 }</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
 }</component>
@@ -115,11 +119,24 @@
       <updated>1736358402529</updated>
       <workItem from="1736359082475" duration="1790000" />
       <workItem from="1736360932542" duration="27000" />
-      <workItem from="1736361027658" duration="4993000" />
+      <workItem from="1736361027658" duration="11121000" />
     </task>
+    <task id="LOCAL-00001" summary="Al doilea commit!">
+      <option name="closed" value="true" />
+      <created>1736366110482</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1736366110482</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Al doilea commit!" />
+    <option name="LAST_COMMIT_MESSAGE" value="Al doilea commit!" />
   </component>
 </project>

@@ -3,6 +3,8 @@ package org.example.entities;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "Trainer")
@@ -24,4 +26,6 @@ public class Trainer {
     private String specialization;
 
 
+    @OneToMany(mappedBy = "trainer", fetch = FetchType.EAGER)
+    private List<TrainingSession> trainingSessions;
 }

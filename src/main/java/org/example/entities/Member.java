@@ -3,6 +3,8 @@ package org.example.entities;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "Member")
@@ -23,5 +25,7 @@ public class Member {
 
     private String membershipType;
 
+    @ManyToMany(mappedBy = "members",fetch = FetchType.EAGER)
+    private List<TrainingSession> trainingSessions;
 
 }

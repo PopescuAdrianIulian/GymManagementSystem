@@ -3,51 +3,180 @@ package org.example.util;
 
 import org.example.entities.Member;
 import org.example.entities.Trainer;
+import org.example.entities.TrainingSession;
 import org.example.exceptions.MemberNotFoundException;
 import org.example.exceptions.TrainerNotFoundException;
+import org.example.exceptions.TrainingSessionNotFoundException;
 import org.example.repositories.MemberRepository;
 import org.example.repositories.TrainerRepository;
+import org.example.repositories.TrainingSessionRepository;
 
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Scanner;
+import java.util.Set;
 
 public class GymCli {
     private final MemberRepository memberRepository;
     private final TrainerRepository trainerRepository;
+    private final TrainingSessionRepository trainingSessionRepository;
 
 
-    public GymCli(MemberRepository memberRepository, TrainerRepository trainerRepository) {
+    public GymCli(MemberRepository memberRepository, TrainerRepository trainerRepository, TrainingSessionRepository trainingSessionRepository) {
         this.memberRepository = memberRepository;
         this.trainerRepository = trainerRepository;
+        this.trainingSessionRepository = trainingSessionRepository;
     }
 
     public void start() {
-       while(true) {
-           Scanner scanner = new Scanner(System.in);
-           System.out.println("Gym Management System");
-           System.out.println("1. Manage Members");
-           System.out.println("2. Manage Trainers");
-           System.out.println("3. Exit");
-           System.out.print("Choose an option: ");
-           int choice = scanner.nextInt();
-           scanner.nextLine();
+        while (true) {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Gym Management System");
+            System.out.println("1. Manage Members");
+            System.out.println("2. Manage Trainers");
+            System.out.println("3. Manage Training Sessions");
+            System.out.println("4. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
 
-           switch (choice) {
-               case 1:
-                   manageMembers(scanner);
-                   break;
-               case 2:
-                   manageTrainers(scanner);
-                   break;
-               case 3:
-                   System.out.println("CLI stopping");
-                   scanner.close();
-                   return;
-               default:
-                   System.out.println("Invalid choice!");
-                   break;
-           }
-       }
+            switch (choice) {
+                case 1:
+                    manageMembers(scanner);
+                    break;
+                case 2:
+                    manageTrainers(scanner);
+                    break;
+                case 3:
+                    manageTrainingSession(scanner);
+                    break;
+                case 4:
+                    System.out.println("CLI stopping");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Invalid choice!");
+                    break;
+            }
+        }
+    }
+
+    private void manageTrainingSession(Scanner scanner) {
+        System.out.println("Training Session Management");
+        System.out.println("1. Add Training Session");
+        System.out.println("2. Update Training Session");
+        System.out.println("3. Delete Training Session");
+        System.out.println("4. Assign Trainer for Training Session");
+        System.out.println("5. View all members");
+        System.out.println("6. Back");
+        System.out.print("Choose an option: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        switch (choice) {
+            case 1:
+                addTrainingSession(scanner);
+                break;
+            case 2:
+                updateTrainingSession(scanner);
+                break;
+            case 3:
+                deleteTrainingSession(scanner);
+                break;
+            case 4:
+                assignTrainer(scanner);
+                break;
+            case 5:
+                viewAllMembers(scanner);
+                break;
+            case 6:
+                return;
+            default:
+                System.out.println("Invalid choice!");
+                break;
+        }
+    }
+
+    private void viewAllMembers(Scanner scanner) {
+        System.out.println("Enter Session ID:");
+        int sesionId = scanner.nextInt();
+        scanner.nextLine();
+        TrainingSession trainingSession = trainingSessionRepository.getTrainingSessionById(sesionId);
+
+        if (trainingSession != null) {
+            System.out.println("Members for " + trainingSession.getSessionName());
+            for (Member m : trainingSession.getMembers()) {
+                System.out.println(m.getId() + " " + m.getFirstName() + " " + m.getLastName() + " " + m.getMembershipType());
+            }
+        } else {
+            System.out.println("Session not found!");
+        }
+    }
+
+    private void assignTrainer(Scanner scanner) {
+
+        System.out.println("Enter Trainer ID:");
+        int trainerId = scanner.nextInt();
+        System.out.println("Enter Session ID:");
+        int sessionId = scanner.nextInt();
+        scanner.nextLine();
+
+        Trainer tempTrainer = trainerRepository.getTrainerById(trainerId);
+        TrainingSession session = trainingSessionRepository.getTrainingSessionById(sessionId);
+
+        if (tempTrainer != null && session != null) {
+            session.setTrainer(tempTrainer);
+            trainingSessionRepository.updateTrainingSession(session);
+            System.out.println("Trainer enrolled successfully!");
+        } else {
+            throw new TrainingSessionNotFoundException();
+        }
+    }
+
+    private void deleteTrainingSession(Scanner scanner) {
+        System.out.println("Enter the Training Session id");
+        int tempId = scanner.nextInt();
+        scanner.nextLine();
+        TrainingSession tempTrainingSession = trainingSessionRepository.getTrainingSessionById(tempId);
+        if (tempTrainingSession == null) {
+            throw new TrainingSessionNotFoundException();
+        } else {
+            trainingSessionRepository.deleteTrainingSession(tempTrainingSession);
+            System.out.println("Deleted successfully!");
+        }
+    }
+
+    private void updateTrainingSession(Scanner scanner) {
+        System.out.println("Enter the Training Session id");
+        int tempId = scanner.nextInt();
+        scanner.nextLine();
+        TrainingSession tempTrainingSession = trainingSessionRepository.getTrainingSessionById(tempId);
+        if (tempTrainingSession == null) {
+            throw new TrainingSessionNotFoundException();
+        } else {
+
+            System.out.println("New Session Name: ");
+            String sessionName = scanner.nextLine();
+
+            tempTrainingSession.setSessionName(sessionName);
+
+            trainingSessionRepository.updateTrainingSession(tempTrainingSession);
+            System.out.println("Training Session updated successfully!");
+
+
+        }
+    }
+
+    private void addTrainingSession(Scanner scanner) {
+        System.out.println("Session Name: ");
+        String sessionName = scanner.nextLine();
+
+
+        TrainingSession tempTrainingSession = new TrainingSession();
+        tempTrainingSession.setSessionName(sessionName);
+        tempTrainingSession.setSchedule(LocalDateTime.now());
+
+        trainingSessionRepository.createTrainingSession(tempTrainingSession);
+        System.out.println("Training session added successfully!");
     }
 
 
@@ -57,7 +186,8 @@ public class GymCli {
         System.out.println("2. Update Trainer");
         System.out.println("3. View Trainers");
         System.out.println("4. Delete Trainer");
-        System.out.println("5. Back");
+        System.out.println("5. view Trainer Schedule");
+        System.out.println("6. Back");
         System.out.print("Choose an option: ");
         int choice = scanner.nextInt();
         scanner.nextLine();
@@ -76,10 +206,29 @@ public class GymCli {
                 deleteTrainer(scanner);
                 break;
             case 5:
+                viewTrainerSchedule(scanner);
+                break;
+            case 6:
                 return;
             default:
                 System.out.println("Invalid choice!");
                 break;
+        }
+    }
+
+    private void viewTrainerSchedule(Scanner scanner) {
+        System.out.println("Enter Trainer ID:");
+        int trainerId = scanner.nextInt();
+        scanner.nextLine();
+        Trainer trainer = trainerRepository.getTrainerById(trainerId);
+
+        if (trainer != null) {
+            System.out.println("Schedule for " + trainer.getFirstName() + " " + trainer.getLastName() + ":");
+            for (TrainingSession session : trainer.getTrainingSessions()) {
+                System.out.println(session.getSessionName() + " - " + session.getSchedule());
+            }
+        } else {
+            System.out.println("Trainer not found!");
         }
     }
 
@@ -90,7 +239,9 @@ public class GymCli {
         System.out.println("2. Update Members");
         System.out.println("3. View Members");
         System.out.println("4. Delete Members");
-        System.out.println("5. Back");
+        System.out.println("5. Assign Member to Training Session");
+        System.out.println("6. View Member Schedule");
+        System.out.println("7. Back");
         System.out.print("Choose an option: ");
         int choice = scanner.nextInt();
         scanner.nextLine();
@@ -109,11 +260,54 @@ public class GymCli {
                 deleteMembers(scanner);
                 break;
             case 5:
+                assignMember(scanner);
+                break;
+            case 6:
+                viewMemberSchedule(scanner);
+                break;
+            case 7:
                 return;
             default:
                 System.out.println("Invalid choice!");
                 break;
         }
+    }
+
+    private void viewMemberSchedule(Scanner scanner) {
+        System.out.println("Enter Member ID:");
+        int memberId = scanner.nextInt();
+        scanner.nextLine();
+        Member member = memberRepository.getMemberById(memberId);
+
+        if (member != null) {
+            System.out.println("schedule for " + member.getFirstName() + " " + member.getLastName() + ":");
+            for (TrainingSession session : member.getTrainingSessions()) {
+                System.out.println(session.getSessionName() + " - " + session.getSchedule());
+            }
+        } else {
+            System.out.println("Member not found!");
+        }
+    }
+
+    private void assignMember(Scanner scanner) {
+
+        System.out.println("Enter Member ID:");
+        int memberId = scanner.nextInt();
+        System.out.println("Enter Session ID:");
+        int sessionId = scanner.nextInt();
+        scanner.nextLine();
+
+        Member member = memberRepository.getMemberById(memberId);
+        TrainingSession session = trainingSessionRepository.getTrainingSessionById(sessionId);
+
+        if (member != null && session != null) {
+            session.getMembers().add(member);
+            trainingSessionRepository.updateTrainingSession(session);
+            System.out.println("Member enrolled successfully!");
+        } else {
+            throw new TrainingSessionNotFoundException();
+        }
+
     }
 
     private void deleteMembers(Scanner scanner) {
