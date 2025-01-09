@@ -1,30 +1,24 @@
 package org.example.util;
 
 
-import org.example.entities.Member;
-import org.example.entities.Trainer;
-import org.example.entities.TrainingSession;
+import org.example.entities.*;
 import org.example.exceptions.MemberNotFoundException;
 import org.example.exceptions.TrainerNotFoundException;
 import org.example.exceptions.TrainingSessionNotFoundException;
-import org.example.repositories.MemberRepository;
-import org.example.repositories.TrainerRepository;
-import org.example.repositories.TrainingSessionRepository;
+import org.example.repositories.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 
 public class GymCli {
-    private final MemberRepository memberRepository;
-    private final TrainerRepository trainerRepository;
-    private final TrainingSessionRepository trainingSessionRepository;
+    private static final MemberRepository memberRepository = new MemberRepository();
+    private static final TrainerRepository trainerRepository = new TrainerRepository();
+    private static final TrainingSessionRepository trainingSessionRepository = new TrainingSessionRepository();
+    private static final ProgressRepository progressRepository = new ProgressRepository();
+    private static final SubscriptionRepository subscriptionRepository = new SubscriptionRepository();
 
-
-    public GymCli(MemberRepository memberRepository, TrainerRepository trainerRepository, TrainingSessionRepository trainingSessionRepository) {
-        this.memberRepository = memberRepository;
-        this.trainerRepository = trainerRepository;
-        this.trainingSessionRepository = trainingSessionRepository;
+    public GymCli() {
     }
 
     public void start() {
@@ -179,7 +173,6 @@ public class GymCli {
         System.out.println("Training session added successfully!");
     }
 
-
     private void manageTrainers(Scanner scanner) {
         System.out.println("Trainer Management");
         System.out.println("1. Add Trainer");
@@ -220,7 +213,7 @@ public class GymCli {
         System.out.println("Enter Trainer ID:");
         int trainerId = scanner.nextInt();
         scanner.nextLine();
-        Trainer trainer = trainerRepository.getTrainerById(trainerId);
+        Trainer trainer = trainerRepository.getTrainerSessionById(trainerId);
 
         if (trainer != null) {
             System.out.println("Schedule for " + trainer.getFirstName() + " " + trainer.getLastName() + ":");
@@ -232,7 +225,6 @@ public class GymCli {
         }
     }
 
-
     private void manageMembers(Scanner scanner) {
         System.out.println("Members Management");
         System.out.println("1. Add Members");
@@ -241,7 +233,11 @@ public class GymCli {
         System.out.println("4. Delete Members");
         System.out.println("5. Assign Member to Training Session");
         System.out.println("6. View Member Schedule");
-        System.out.println("7. Back");
+        System.out.println("7. Renew Subscription");
+        System.out.println("8. Check Subscription");
+        System.out.println("9. Add Progress");
+        System.out.println("10. Check Progress");
+        System.out.println("11. Back");
         System.out.print("Choose an option: ");
         int choice = scanner.nextInt();
         scanner.nextLine();
@@ -266,6 +262,18 @@ public class GymCli {
                 viewMemberSchedule(scanner);
                 break;
             case 7:
+                renewSubscription(scanner);
+                break;
+            case 8:
+                checkSubscription(scanner);
+                break;
+            case 9:
+                addProgress(scanner);
+                break;
+            case 10:
+                checkProgress(scanner);
+                break;
+            case 11:
                 return;
             default:
                 System.out.println("Invalid choice!");
@@ -273,11 +281,110 @@ public class GymCli {
         }
     }
 
+    private void checkProgress(Scanner scanner) {
+        System.out.println("Enter Member ID: ");
+        int memberId = scanner.nextInt();
+        scanner.nextLine();
+
+        List<Progress> progressList = memberRepository.getMemberProgressById(memberId);
+        for (Progress p : progressList) {
+            System.out.println("Data: " + p.getDate());
+            System.out.println("Weight: " + p.getWeight());
+            System.out.println("Body fat: " + p.getBodyFatPercentage());
+        }
+
+    }
+
+    private void addProgress(Scanner scanner) {
+        System.out.println("Enter Member ID: ");
+        int memberId = scanner.nextInt();
+        scanner.nextLine();
+
+
+        System.out.println("Enter Date");
+        String date = scanner.nextLine();
+
+        System.out.println("Enter weight");
+        int weight = scanner.nextInt();
+        scanner.nextLine();
+
+        System.out.println("Enter body fat ");
+        int bf = scanner.nextInt();
+        scanner.nextLine();
+
+        Progress tempProgress = new Progress();
+        tempProgress.setDate(date);
+        tempProgress.setWeight(weight);
+        tempProgress.setBodyFatPercentage(bf);
+
+
+        Member tempMember = memberRepository.addProgressToMemberById(memberId, tempProgress);
+        if (tempMember == null) {
+            throw new MemberNotFoundException();
+        }
+        tempProgress.setMember(tempMember);
+        progressRepository.createProgress(tempProgress);
+        memberRepository.updateMember(tempMember);
+        System.out.println("Subscription added successfully!");
+
+    }
+
+    private void checkSubscription(Scanner scanner) {
+        System.out.println("Enter Member ID: ");
+        int memberId = scanner.nextInt();
+        scanner.nextLine();
+        Member tempMember = memberRepository.getMemberById(memberId);
+
+        if (tempMember == null) {
+            throw new MemberNotFoundException();
+        }
+        Member tempMember2 = memberRepository.getMemberSubscriptionById(memberId);
+        Subscription subscription = tempMember2.getSubscription();
+
+        if (tempMember2 == null) {
+            System.out.println("No subscription found for this member.");
+            return;
+        }
+        System.out.println("Subscription Details:");
+        System.out.println("Membership Type: " + subscription.getMembershipType());
+        System.out.println("Start Date: " + subscription.getStartDate());
+        System.out.println("End Date: " + subscription.getEndDate());
+    }
+
+    private void renewSubscription(Scanner scanner) {
+        System.out.println("Enter Member ID: ");
+        int memberId = scanner.nextInt();
+        scanner.nextLine();
+        Member member = memberRepository.getMemberById(memberId);
+        if (member == null) {
+            throw new MemberNotFoundException();
+        }
+
+        System.out.println("Enter Membership Type");
+        String membershipType = scanner.nextLine();
+
+        System.out.println("Enter Start Date");
+        String startDate = scanner.nextLine();
+
+        System.out.println("Enter End Date");
+        String endDate = scanner.nextLine();
+
+        Subscription subscription = new Subscription();
+        subscription.setMembershipType(membershipType);
+        subscription.setStartDate(startDate);
+        subscription.setEndDate(endDate);
+        subscription.setMember(member);
+
+        subscriptionRepository.createSubscription(subscription);
+        System.out.println("Subscription added successfully!");
+
+    }
+
     private void viewMemberSchedule(Scanner scanner) {
         System.out.println("Enter Member ID:");
         int memberId = scanner.nextInt();
         scanner.nextLine();
-        Member member = memberRepository.getMemberById(memberId);
+        Member member = memberRepository.getMemberSessionById(memberId);
 
         if (member != null) {
             System.out.println("schedule for " + member.getFirstName() + " " + member.getLastName() + ":");
@@ -299,9 +406,9 @@ public class GymCli {
 
         Member member = memberRepository.getMemberById(memberId);
 
-        if (member != null ) {
+        if (member != null) {
             TrainingSession session = trainingSessionRepository.addNewMemberToTrainingSessionById(sessionId, member);
-            if(session != null){
+            if (session != null) {
                 trainingSessionRepository.updateTrainingSession(session);
             }
             System.out.println("Member enrolled successfully!");
@@ -323,7 +430,6 @@ public class GymCli {
             System.out.println("Deleted successfully!");
         }
     }
-
 
     private void viewMember(Scanner scanner) {
         System.out.println("Enter the Member id");
@@ -386,7 +492,6 @@ public class GymCli {
         System.out.println("Member added successfully!");
 
     }
-
 
     private void addTrainer(Scanner scanner) {
         System.out.println("First Name: ");

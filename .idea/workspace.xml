@@ -4,11 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0216f41c-2083-42ec-a0d0-4aec0e4bab6e" name="Changes" comment="Al doilea commit!">
+    <list default="true" id="0216f41c-2083-42ec-a0d0-4aec0e4bab6e" name="Changes" comment="al treilea commit!">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/entities/Member.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/entities/Member.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/entities/Trainer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/entities/Trainer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/repositories/MemberRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/repositories/MemberRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/repositories/TrainerRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/repositories/TrainerRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/util/GymCli.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/util/GymCli.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" afterDir="false" />
     </list>
@@ -119,7 +120,9 @@
       <updated>1736358402529</updated>
       <workItem from="1736359082475" duration="1790000" />
       <workItem from="1736360932542" duration="27000" />
-      <workItem from="1736361027658" duration="11121000" />
+      <workItem from="1736361027658" duration="16690000" />
+      <workItem from="1736439590123" duration="2757000" />
+      <workItem from="1736442454957" duration="6797000" />
     </task>
     <task id="LOCAL-00001" summary="Al doilea commit!">
       <option name="closed" value="true" />
@@ -129,14 +132,44 @@
       <option name="project" value="LOCAL" />
       <updated>1736366110482</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="al treilea commit!">
+      <option name="closed" value="true" />
+      <created>1736372943554</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1736372943554</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Al doilea commit!" />
-    <option name="LAST_COMMIT_MESSAGE" value="Al doilea commit!" />
+    <MESSAGE value="al treilea commit!" />
+    <option name="LAST_COMMIT_MESSAGE" value="al treilea commit!" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="org.hibernate.hql.internal.ast.QuerySyntaxException" package="org.hibernate.hql.internal.ast" />
+          <option name="timeStamp" value="6" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

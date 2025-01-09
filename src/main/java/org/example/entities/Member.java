@@ -28,4 +28,10 @@ public class Member {
     @ManyToMany(mappedBy = "members")
     private List<TrainingSession> trainingSessions;
 
+    @OneToOne(mappedBy = "member")
+    private Subscription subscription;
+
+    @OneToMany(mappedBy = "member")
+    private List<Progress>progressList;
+
 }

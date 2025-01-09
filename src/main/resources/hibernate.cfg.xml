@@ -9,10 +9,12 @@
         <property name="connection.password">password</property>
         <property name="dialect">org.hibernate.dialect.MySQL8Dialect</property>
         <property name="show_sql">true</property>
-        <property name="hbm2ddl.auto">update</property>
+        <property name="hbm2ddl.auto">create</property>
         <mapping class="org.example.entities.Member"/>
         <mapping class="org.example.entities.Trainer"/>
         <mapping class="org.example.entities.TrainingSession"/>
+        <mapping class="org.example.entities.Subscription"/>
+        <mapping class="org.example.entities.Progress"/>
 
 
     </session-factory>

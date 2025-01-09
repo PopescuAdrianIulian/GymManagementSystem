@@ -1,0 +1,350 @@
+Index: src/main/java/org/example/util/GymCli.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example.util;\r\n\r\n\r\nimport org.example.entities.Member;\r\nimport org.example.entities.Trainer;\r\nimport org.example.entities.TrainingSession;\r\nimport org.example.exceptions.MemberNotFoundException;\r\nimport org.example.exceptions.TrainerNotFoundException;\r\nimport org.example.exceptions.TrainingSessionNotFoundException;\r\nimport org.example.repositories.MemberRepository;\r\nimport org.example.repositories.TrainerRepository;\r\nimport org.example.repositories.TrainingSessionRepository;\r\n\r\nimport java.time.LocalDateTime;\r\nimport java.util.Scanner;\r\nimport java.util.Set;\r\n\r\npublic class GymCli {\r\n    private final MemberRepository memberRepository;\r\n    private final TrainerRepository trainerRepository;\r\n    private final TrainingSessionRepository trainingSessionRepository;\r\n\r\n\r\n    public GymCli(MemberRepository memberRepository, TrainerRepository trainerRepository, TrainingSessionRepository trainingSessionRepository) {\r\n        this.memberRepository = memberRepository;\r\n        this.trainerRepository = trainerRepository;\r\n        this.trainingSessionRepository = trainingSessionRepository;\r\n    }\r\n\r\n    public void start() {\r\n        while (true) {\r\n            Scanner scanner = new Scanner(System.in);\r\n            System.out.println(\"Gym Management System\");\r\n            System.out.println(\"1. Manage Members\");\r\n            System.out.println(\"2. Manage Trainers\");\r\n            System.out.println(\"3. Manage Training Sessions\");\r\n            System.out.println(\"4. Exit\");\r\n            System.out.print(\"Choose an option: \");\r\n            int choice = scanner.nextInt();\r\n            scanner.nextLine();\r\n\r\n            switch (choice) {\r\n                case 1:\r\n                    manageMembers(scanner);\r\n                    break;\r\n                case 2:\r\n                    manageTrainers(scanner);\r\n                    break;\r\n                case 3:\r\n                    manageTrainingSession(scanner);\r\n                    break;\r\n                case 4:\r\n                    System.out.println(\"CLI stopping\");\r\n                    scanner.close();\r\n                    return;\r\n                default:\r\n                    System.out.println(\"Invalid choice!\");\r\n                    break;\r\n            }\r\n        }\r\n    }\r\n\r\n    private void manageTrainingSession(Scanner scanner) {\r\n        System.out.println(\"Training Session Management\");\r\n        System.out.println(\"1. Add Training Session\");\r\n        System.out.println(\"2. Update Training Session\");\r\n        System.out.println(\"3. Delete Training Session\");\r\n        System.out.println(\"4. Assign Trainer for Training Session\");\r\n        System.out.println(\"5. View all members\");\r\n        System.out.println(\"6. Back\");\r\n        System.out.print(\"Choose an option: \");\r\n        int choice = scanner.nextInt();\r\n        scanner.nextLine();\r\n\r\n        switch (choice) {\r\n            case 1:\r\n                addTrainingSession(scanner);\r\n                break;\r\n            case 2:\r\n                updateTrainingSession(scanner);\r\n                break;\r\n            case 3:\r\n                deleteTrainingSession(scanner);\r\n                break;\r\n            case 4:\r\n                assignTrainer(scanner);\r\n                break;\r\n            case 5:\r\n                viewAllMembers(scanner);\r\n                break;\r\n            case 6:\r\n                return;\r\n            default:\r\n                System.out.println(\"Invalid choice!\");\r\n                break;\r\n        }\r\n    }\r\n\r\n    private void viewAllMembers(Scanner scanner) {\r\n        System.out.println(\"Enter Session ID:\");\r\n        int sesionId = scanner.nextInt();\r\n        scanner.nextLine();\r\n        TrainingSession trainingSession = trainingSessionRepository.getTrainingSessionById(sesionId);\r\n\r\n        if (trainingSession != null) {\r\n            System.out.println(\"Members for \" + trainingSession.getSessionName());\r\n            for (Member m : trainingSession.getMembers()) {\r\n                System.out.println(m.getId() + \" \" + m.getFirstName() + \" \" + m.getLastName() + \" \" + m.getMembershipType());\r\n            }\r\n        } else {\r\n            System.out.println(\"Session not found!\");\r\n        }\r\n    }\r\n\r\n    private void assignTrainer(Scanner scanner) {\r\n\r\n        System.out.println(\"Enter Trainer ID:\");\r\n        int trainerId = scanner.nextInt();\r\n        System.out.println(\"Enter Session ID:\");\r\n        int sessionId = scanner.nextInt();\r\n        scanner.nextLine();\r\n\r\n        Trainer tempTrainer = trainerRepository.getTrainerById(trainerId);\r\n        TrainingSession session = trainingSessionRepository.getTrainingSessionById(sessionId);\r\n\r\n        if (tempTrainer != null && session != null) {\r\n            session.setTrainer(tempTrainer);\r\n            trainingSessionRepository.updateTrainingSession(session);\r\n            System.out.println(\"Trainer enrolled successfully!\");\r\n        } else {\r\n            throw new TrainingSessionNotFoundException();\r\n        }\r\n    }\r\n\r\n    private void deleteTrainingSession(Scanner scanner) {\r\n        System.out.println(\"Enter the Training Session id\");\r\n        int tempId = scanner.nextInt();\r\n        scanner.nextLine();\r\n        TrainingSession tempTrainingSession = trainingSessionRepository.getTrainingSessionById(tempId);\r\n        if (tempTrainingSession == null) {\r\n            throw new TrainingSessionNotFoundException();\r\n        } else {\r\n            trainingSessionRepository.deleteTrainingSession(tempTrainingSession);\r\n            System.out.println(\"Deleted successfully!\");\r\n        }\r\n    }\r\n\r\n    private void updateTrainingSession(Scanner scanner) {\r\n        System.out.println(\"Enter the Training Session id\");\r\n        int tempId = scanner.nextInt();\r\n        scanner.nextLine();\r\n        TrainingSession tempTrainingSession = trainingSessionRepository.getTrainingSessionById(tempId);\r\n        if (tempTrainingSession == null) {\r\n            throw new TrainingSessionNotFoundException();\r\n        } else {\r\n\r\n            System.out.println(\"New Session Name: \");\r\n            String sessionName = scanner.nextLine();\r\n\r\n            tempTrainingSession.setSessionName(sessionName);\r\n\r\n            trainingSessionRepository.updateTrainingSession(tempTrainingSession);\r\n            System.out.println(\"Training Session updated successfully!\");\r\n\r\n\r\n        }\r\n    }\r\n\r\n    private void addTrainingSession(Scanner scanner) {\r\n        System.out.println(\"Session Name: \");\r\n        String sessionName = scanner.nextLine();\r\n\r\n\r\n        TrainingSession tempTrainingSession = new TrainingSession();\r\n        tempTrainingSession.setSessionName(sessionName);\r\n        tempTrainingSession.setSchedule(LocalDateTime.now());\r\n\r\n        trainingSessionRepository.createTrainingSession(tempTrainingSession);\r\n        System.out.println(\"Training session added successfully!\");\r\n    }\r\n\r\n\r\n    private void manageTrainers(Scanner scanner) {\r\n        System.out.println(\"Trainer Management\");\r\n        System.out.println(\"1. Add Trainer\");\r\n        System.out.println(\"2. Update Trainer\");\r\n        System.out.println(\"3. View Trainers\");\r\n        System.out.println(\"4. Delete Trainer\");\r\n        System.out.println(\"5. view Trainer Schedule\");\r\n        System.out.println(\"6. Back\");\r\n        System.out.print(\"Choose an option: \");\r\n        int choice = scanner.nextInt();\r\n        scanner.nextLine();\r\n\r\n        switch (choice) {\r\n            case 1:\r\n                addTrainer(scanner);\r\n                break;\r\n            case 2:\r\n                updateTrainer(scanner);\r\n                break;\r\n            case 3:\r\n                viewTrainer(scanner);\r\n                break;\r\n            case 4:\r\n                deleteTrainer(scanner);\r\n                break;\r\n            case 5:\r\n                viewTrainerSchedule(scanner);\r\n                break;\r\n            case 6:\r\n                return;\r\n            default:\r\n                System.out.println(\"Invalid choice!\");\r\n                break;\r\n        }\r\n    }\r\n\r\n    private void viewTrainerSchedule(Scanner scanner) {\r\n        System.out.println(\"Enter Trainer ID:\");\r\n        int trainerId = scanner.nextInt();\r\n        scanner.nextLine();\r\n        Trainer trainer = trainerRepository.getTrainerById(trainerId);\r\n\r\n        if (trainer != null) {\r\n            System.out.println(\"Schedule for \" + trainer.getFirstName() + \" \" + trainer.getLastName() + \":\");\r\n            for (TrainingSession session : trainer.getTrainingSessions()) {\r\n                System.out.println(session.getSessionName() + \" - \" + session.getSchedule());\r\n            }\r\n        } else {\r\n            System.out.println(\"Trainer not found!\");\r\n        }\r\n    }\r\n\r\n\r\n    private void manageMembers(Scanner scanner) {\r\n        System.out.println(\"Members Management\");\r\n        System.out.println(\"1. Add Members\");\r\n        System.out.println(\"2. Update Members\");\r\n        System.out.println(\"3. View Members\");\r\n        System.out.println(\"4. Delete Members\");\r\n        System.out.println(\"5. Assign Member to Training Session\");\r\n        System.out.println(\"6. View Member Schedule\");\r\n        System.out.println(\"7. Back\");\r\n        System.out.print(\"Choose an option: \");\r\n        int choice = scanner.nextInt();\r\n        scanner.nextLine();\r\n\r\n        switch (choice) {\r\n            case 1:\r\n                addMembers(scanner);\r\n                break;\r\n            case 2:\r\n                updateMembers(scanner);\r\n                break;\r\n            case 3:\r\n                viewMember(scanner);\r\n                break;\r\n            case 4:\r\n                deleteMembers(scanner);\r\n                break;\r\n            case 5:\r\n                assignMember(scanner);\r\n                break;\r\n            case 6:\r\n                viewMemberSchedule(scanner);\r\n                break;\r\n            case 7:\r\n                return;\r\n            default:\r\n                System.out.println(\"Invalid choice!\");\r\n                break;\r\n        }\r\n    }\r\n\r\n    private void viewMemberSchedule(Scanner scanner) {\r\n        System.out.println(\"Enter Member ID:\");\r\n        int memberId = scanner.nextInt();\r\n        scanner.nextLine();\r\n        Member member = memberRepository.getMemberById(memberId);\r\n\r\n        if (member != null) {\r\n            System.out.println(\"schedule for \" + member.getFirstName() + \" \" + member.getLastName() + \":\");\r\n            for (TrainingSession session : member.getTrainingSessions()) {\r\n                System.out.println(session.getSessionName() + \" - \" + session.getSchedule());\r\n            }\r\n        } else {\r\n            System.out.println(\"Member not found!\");\r\n        }\r\n    }\r\n\r\n    private void assignMember(Scanner scanner) {\r\n\r\n        System.out.println(\"Enter Member ID:\");\r\n        int memberId = scanner.nextInt();\r\n        System.out.println(\"Enter Session ID:\");\r\n        int sessionId = scanner.nextInt();\r\n        scanner.nextLine();\r\n\r\n        Member member = memberRepository.getMemberById(memberId);\r\n        TrainingSession session = trainingSessionRepository.getTrainingSessionById(sessionId);\r\n\r\n        if (member != null && session != null) {\r\n            session.getMembers().add(member);\r\n            trainingSessionRepository.updateTrainingSession(session);\r\n            System.out.println(\"Member enrolled successfully!\");\r\n        } else {\r\n            throw new TrainingSessionNotFoundException();\r\n        }\r\n\r\n    }\r\n\r\n    private void deleteMembers(Scanner scanner) {\r\n        System.out.println(\"Enter the Member id\");\r\n        int tempId = scanner.nextInt();\r\n        scanner.nextLine();\r\n        Member tempMember = memberRepository.getMemberById(tempId);\r\n        if (tempMember == null) {\r\n            throw new MemberNotFoundException();\r\n        } else {\r\n            memberRepository.deleteMember(tempMember);\r\n            System.out.println(\"Deleted successfully!\");\r\n        }\r\n    }\r\n\r\n\r\n    private void viewMember(Scanner scanner) {\r\n        System.out.println(\"Enter the Member id\");\r\n        int tempId = scanner.nextInt();\r\n        scanner.nextLine();\r\n        Member tempMember = memberRepository.getMemberById(tempId);\r\n        if (tempMember == null) {\r\n            throw new MemberNotFoundException();\r\n        } else {\r\n            System.out.println(tempMember.getId());\r\n            System.out.println(tempMember.getFirstName());\r\n            System.out.println(tempMember.getLastName());\r\n            System.out.println(tempMember.getMembershipType());\r\n        }\r\n\r\n\r\n    }\r\n\r\n    private void updateMembers(Scanner scanner) {\r\n        System.out.println(\"Enter the Member id\");\r\n        int tempId = scanner.nextInt();\r\n        scanner.nextLine();\r\n        Member tempMember = memberRepository.getMemberById(tempId);\r\n        if (tempMember == null) {\r\n            throw new MemberNotFoundException();\r\n        } else {\r\n\r\n            System.out.println(\"New First Name: \");\r\n            String firstName = scanner.nextLine();\r\n            System.out.println(\"New Last Name: \");\r\n            String lastName = scanner.nextLine();\r\n            System.out.println(\"New membership Type: \");\r\n            String membership = scanner.nextLine();\r\n\r\n            tempMember.setFirstName(firstName);\r\n            tempMember.setLastName(lastName);\r\n            tempMember.setMembershipType(membership);\r\n\r\n            memberRepository.updateMember(tempMember);\r\n            System.out.println(\"Member updated successfully!\");\r\n\r\n\r\n        }\r\n    }\r\n\r\n    private void addMembers(Scanner scanner) {\r\n        System.out.println(\"First Name: \");\r\n        String firstName = scanner.nextLine();\r\n        System.out.println(\"Last Name: \");\r\n        String lastName = scanner.nextLine();\r\n        System.out.println(\"Membership Type: \");\r\n        String membershipType = scanner.nextLine();\r\n\r\n        Member newMember = new Member();\r\n        newMember.setFirstName(firstName);\r\n        newMember.setLastName(lastName);\r\n        newMember.setMembershipType(membershipType);\r\n\r\n        memberRepository.createMember(newMember);\r\n        System.out.println(\"Member added successfully!\");\r\n\r\n    }\r\n\r\n\r\n    private void addTrainer(Scanner scanner) {\r\n        System.out.println(\"First Name: \");\r\n        String firstName = scanner.nextLine();\r\n        System.out.println(\"Last Name: \");\r\n        String lastName = scanner.nextLine();\r\n        System.out.println(\"specialization Type: \");\r\n        String specialization = scanner.nextLine();\r\n\r\n        Trainer newTrainer = new Trainer();\r\n        newTrainer.setFirstName(firstName);\r\n        newTrainer.setLastName(lastName);\r\n        newTrainer.setSpecialization(specialization);\r\n\r\n        trainerRepository.createTrainer(newTrainer);\r\n        System.out.println(\"Member added successfully!\");\r\n\r\n    }\r\n\r\n    private void updateTrainer(Scanner scanner) {\r\n        System.out.println(\"Enter the Trainer id\");\r\n        int tempId = scanner.nextInt();\r\n        scanner.nextLine();\r\n        Trainer tempTrainer = trainerRepository.getTrainerById(tempId);\r\n        if (tempTrainer == null) {\r\n            throw new TrainerNotFoundException();\r\n        } else {\r\n\r\n            System.out.println(\"New First Name: \");\r\n            String firstName = scanner.nextLine();\r\n            System.out.println(\"New Last Name: \");\r\n            String lastName = scanner.nextLine();\r\n            System.out.println(\"New specialization Type: \");\r\n            String specialization = scanner.nextLine();\r\n\r\n            tempTrainer.setFirstName(firstName);\r\n            tempTrainer.setLastName(lastName);\r\n            tempTrainer.setSpecialization(specialization);\r\n\r\n            trainerRepository.updateTrainer(tempTrainer);\r\n            System.out.println(\"Member updated successfully!\");\r\n        }\r\n    }\r\n\r\n    private void viewTrainer(Scanner scanner) {\r\n        System.out.println(\"Enter the Trainer id\");\r\n        int tempId = scanner.nextInt();\r\n        scanner.nextLine();\r\n        Trainer tempTrainer = trainerRepository.getTrainerById(tempId);\r\n        if (tempTrainer == null) {\r\n            throw new TrainerNotFoundException();\r\n        } else {\r\n\r\n            System.out.println(tempTrainer.getId());\r\n            System.out.println(tempTrainer.getFirstName());\r\n            System.out.println(tempTrainer.getLastName());\r\n            System.out.println(tempTrainer.getSpecialization());\r\n        }\r\n    }\r\n\r\n    private void deleteTrainer(Scanner scanner) {\r\n        System.out.println(\"Enter the Trainer id\");\r\n        int tempId = scanner.nextInt();\r\n        scanner.nextLine();\r\n        Trainer tempTrainer = trainerRepository.getTrainerById(tempId);\r\n        if (tempTrainer == null) {\r\n            throw new TrainerNotFoundException();\r\n        } else {\r\n\r\n            trainerRepository.deleteTrainer(tempTrainer);\r\n        }\r\n    }\r\n}\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/org/example/util/GymCli.java b/src/main/java/org/example/util/GymCli.java
+--- a/src/main/java/org/example/util/GymCli.java	(revision c3c9e0c22419470cd50bfc2f3146a1a91876180b)
++++ b/src/main/java/org/example/util/GymCli.java	(date 1736380107112)
+@@ -1,16 +1,16 @@
+ package org.example.util;
+ 
+ 
+-import org.example.entities.Member;
+-import org.example.entities.Trainer;
+-import org.example.entities.TrainingSession;
++import org.example.entities.*;
+ import org.example.exceptions.MemberNotFoundException;
+ import org.example.exceptions.TrainerNotFoundException;
+ import org.example.exceptions.TrainingSessionNotFoundException;
+ import org.example.repositories.MemberRepository;
++import org.example.repositories.SubscriptionRepository;
+ import org.example.repositories.TrainerRepository;
+ import org.example.repositories.TrainingSessionRepository;
+ 
++import java.time.LocalDate;
+ import java.time.LocalDateTime;
+ import java.util.Scanner;
+ import java.util.Set;
+@@ -19,12 +19,15 @@
+     private final MemberRepository memberRepository;
+     private final TrainerRepository trainerRepository;
+     private final TrainingSessionRepository trainingSessionRepository;
++    private final SubscriptionRepository subscriptionRepository;
++    private final Progress progress;
+ 
+-
+-    public GymCli(MemberRepository memberRepository, TrainerRepository trainerRepository, TrainingSessionRepository trainingSessionRepository) {
++    public GymCli(MemberRepository memberRepository, TrainerRepository trainerRepository, TrainingSessionRepository trainingSessionRepository, SubscriptionRepository subscriptionRepository, Progress progress) {
+         this.memberRepository = memberRepository;
+         this.trainerRepository = trainerRepository;
+         this.trainingSessionRepository = trainingSessionRepository;
++        this.subscriptionRepository = subscriptionRepository;
++        this.progress = progress;
+     }
+ 
+     public void start() {
+@@ -241,7 +244,11 @@
+         System.out.println("4. Delete Members");
+         System.out.println("5. Assign Member to Training Session");
+         System.out.println("6. View Member Schedule");
+-        System.out.println("7. Back");
++        System.out.println("7. Renew Subscription");
++        System.out.println("8. Check Subscription");
++        System.out.println("9. Add Progress");
++        System.out.println("10. Check Progress");
++        System.out.println("11. Back");
+         System.out.print("Choose an option: ");
+         int choice = scanner.nextInt();
+         scanner.nextLine();
+@@ -266,6 +273,18 @@
+                 viewMemberSchedule(scanner);
+                 break;
+             case 7:
++                renewSubscription(scanner);
++                break;
++            case 8:
++                checkSubscription(scanner);
++                break;
++            case 9:
++                addProgress(scanner);
++                break;
++            case 10:
++                checkProgress(scanner);
++                break;
++            case 11:
+                 return;
+             default:
+                 System.out.println("Invalid choice!");
+@@ -273,6 +292,66 @@
+         }
+     }
+ 
++    private void checkProgress(Scanner scanner) {
++    }
++
++    private void addProgress(Scanner scanner) {
++    }
++
++    private void checkSubscription(Scanner scanner) {
++        System.out.println("Enter Member ID: ");
++        int memberId = scanner.nextInt();
++        scanner.nextLine();
++        Member member = memberRepository.getMemberById(memberId);
++
++        if (member == null) {
++            System.out.println("Member not found!");
++            return;
++        }
++
++        Subscription subscription = subscriptionRepository.getSubscriptionByMember(member);
++        if (subscription == null) {
++            System.out.println("No subscription found for this member.");
++            return;
++        }
++
++        System.out.println("Subscription Details:");
++        System.out.println("Membership Type: " + subscription.getMembershipType());
++        System.out.println("Start Date: " + subscription.getStartDate());
++        System.out.println("End Date: " + subscription.getEndDate());
++    }
++
++
++    private void renewSubscription(Scanner scanner) {
++        System.out.println("Enter Member ID: ");
++        int memberId = scanner.nextInt();
++        scanner.nextLine();
++        Member member = memberRepository.getMemberById(memberId);
++        if (member == null) {
++            System.out.println("Member not found!");
++            return;
++        }
++
++        System.out.println("Enter Membership Type");
++        String membershipType = scanner.nextLine();
++
++        System.out.println("Enter Start Date");
++        String startDate = scanner.nextLine();
++
++        System.out.println("Enter End Date");
++        String endDate = scanner.nextLine();
++
++        Subscription subscription = new Subscription();
++        subscription.setMembershipType(membershipType);
++        subscription.setStartDate(startDate);
++        subscription.setEndDate(endDate);
++        subscription.setMember(member);
++
++        subscriptionRepository.createSubscription(subscription);
++        System.out.println("Subscription added successfully!");
++
++    }
++
+     private void viewMemberSchedule(Scanner scanner) {
+         System.out.println("Enter Member ID:");
+         int memberId = scanner.nextInt();
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"0216f41c-2083-42ec-a0d0-4aec0e4bab6e\" name=\"Changes\" comment=\"Al doilea commit!\">\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/org/example/Main.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/org/example/Main.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/org/example/entities/Member.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/org/example/entities/Member.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/org/example/entities/Trainer.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/org/example/entities/Trainer.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/org/example/util/GymCli.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/org/example/util/GymCli.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Exception\" />\r\n        <option value=\"Class\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"GitHubPullRequestSearchHistory\">{\r\n  &quot;lastFilter&quot;: {\r\n    &quot;state&quot;: &quot;OPEN&quot;,\r\n    &quot;assignee&quot;: &quot;PopescuAdrianIulian&quot;\r\n  }\r\n}</component>\r\n  <component name=\"GithubPullRequestsUISettings\">{\r\n  &quot;selectedUrlAndAccountId&quot;: {\r\n    &quot;url&quot;: &quot;https://github.com/PopescuAdrianIulian/GymManagementSystem.git&quot;,\r\n    &quot;accountId&quot;: &quot;d8050a5b-4ba4-4535-94ee-f86bf994d659&quot;\r\n  }\r\n}</component>\r\n  <component name=\"ProblemsViewState\">\r\n    <option name=\"selectedTabId\" value=\"CurrentFile\" />\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 7\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"2rMA7VS5if2th6HeHkAOHRfJCPf\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\">\r\n    <ConfirmationsSetting value=\"1\" id=\"Add\" />\r\n  </component>\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\"><![CDATA[{\r\n  \"keyToString\": {\r\n    \"Application.Main.executor\": \"Run\",\r\n    \"Maven.GymManagementSystem [clean].executor\": \"Run\",\r\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\r\n    \"RunOnceActivity.git.unshallow\": \"true\",\r\n    \"SHARE_PROJECT_CONFIGURATION_FILES\": \"true\",\r\n    \"git-widget-placeholder\": \"master\",\r\n    \"kotlin-language-version-configured\": \"true\",\r\n    \"last_opened_file_path\": \"C:/Users/adipo/Desktop/GymManagementSystem/src/main\",\r\n    \"node.js.detected.package.eslint\": \"true\",\r\n    \"node.js.detected.package.tslint\": \"true\",\r\n    \"node.js.selected.package.eslint\": \"(autodetect)\",\r\n    \"node.js.selected.package.tslint\": \"(autodetect)\",\r\n    \"nodejs_package_manager_path\": \"npm\",\r\n    \"project.structure.last.edited\": \"Project\",\r\n    \"project.structure.proportion\": \"0.15\",\r\n    \"project.structure.side.proportion\": \"0.0\",\r\n    \"settings.editor.selected.configurable\": \"configurable.group.appearance\",\r\n    \"vue.rearranger.settings.migration\": \"true\"\r\n  }\r\n}]]></component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"CopyFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\adipo\\Desktop\\GymManagementSystem\\src\\main\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\">\r\n    <configuration name=\"Main\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"org.example.Main\" />\r\n      <module name=\"GymManagementSystem\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"org.example.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <recent_temporary>\r\n      <list>\r\n        <item itemvalue=\"Application.Main\" />\r\n      </list>\r\n    </recent_temporary>\r\n  </component>\r\n  <component name=\"SharedIndexes\">\r\n    <attachedChunks>\r\n      <set>\r\n        <option value=\"bundled-jdk-9823dce3aa75-28b599e66164-intellij.indexing.shared.core-IU-242.23726.103\" />\r\n        <option value=\"bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-IU-242.23726.103\" />\r\n      </set>\r\n    </attachedChunks>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"0216f41c-2083-42ec-a0d0-4aec0e4bab6e\" name=\"Changes\" comment=\"\" />\r\n      <created>1736358402529</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1736358402529</updated>\r\n      <workItem from=\"1736359082475\" duration=\"1790000\" />\r\n      <workItem from=\"1736360932542\" duration=\"27000\" />\r\n      <workItem from=\"1736361027658\" duration=\"11121000\" />\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"Al doilea commit!\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1736366110482</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1736366110482</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"2\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"Al doilea commit!\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"Al doilea commit!\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision c3c9e0c22419470cd50bfc2f3146a1a91876180b)
++++ b/.idea/workspace.xml	(date 1736442439869)
+@@ -4,11 +4,10 @@
+     <option name="autoReloadType" value="SELECTIVE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="0216f41c-2083-42ec-a0d0-4aec0e4bab6e" name="Changes" comment="Al doilea commit!">
++    <list default="true" id="0216f41c-2083-42ec-a0d0-4aec0e4bab6e" name="Changes" comment="al treilea commit!">
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Main.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/entities/Member.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/entities/Member.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/entities/Trainer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/entities/Trainer.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/util/GymCli.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/util/GymCli.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" afterDir="false" />
+     </list>
+@@ -54,28 +53,28 @@
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+   </component>
+-  <component name="PropertiesComponent"><![CDATA[{
+-  "keyToString": {
+-    "Application.Main.executor": "Run",
+-    "Maven.GymManagementSystem [clean].executor": "Run",
+-    "RunOnceActivity.ShowReadmeOnStart": "true",
+-    "RunOnceActivity.git.unshallow": "true",
+-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+-    "git-widget-placeholder": "master",
+-    "kotlin-language-version-configured": "true",
+-    "last_opened_file_path": "C:/Users/adipo/Desktop/GymManagementSystem/src/main",
+-    "node.js.detected.package.eslint": "true",
+-    "node.js.detected.package.tslint": "true",
+-    "node.js.selected.package.eslint": "(autodetect)",
+-    "node.js.selected.package.tslint": "(autodetect)",
+-    "nodejs_package_manager_path": "npm",
+-    "project.structure.last.edited": "Project",
+-    "project.structure.proportion": "0.15",
+-    "project.structure.side.proportion": "0.0",
+-    "settings.editor.selected.configurable": "configurable.group.appearance",
+-    "vue.rearranger.settings.migration": "true"
++  <component name="PropertiesComponent">{
++  &quot;keyToString&quot;: {
++    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
++    &quot;Maven.GymManagementSystem [clean].executor&quot;: &quot;Run&quot;,
++    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
++    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
++    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
++    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
++    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
++    &quot;last_opened_file_path&quot;: &quot;C:/Users/adipo/Desktop/GymManagementSystem/src/main&quot;,
++    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
++    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
++    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
++    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
++    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
++    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
++    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
++    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
++    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.appearance&quot;,
++    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+   }
+-}]]></component>
++}</component>
+   <component name="RecentsManager">
+     <key name="CopyFile.RECENT_KEYS">
+       <recent name="C:\Users\adipo\Desktop\GymManagementSystem\src\main" />
+@@ -119,7 +118,8 @@
+       <updated>1736358402529</updated>
+       <workItem from="1736359082475" duration="1790000" />
+       <workItem from="1736360932542" duration="27000" />
+-      <workItem from="1736361027658" duration="11121000" />
++      <workItem from="1736361027658" duration="16690000" />
++      <workItem from="1736439590123" duration="2757000" />
+     </task>
+     <task id="LOCAL-00001" summary="Al doilea commit!">
+       <option name="closed" value="true" />
+@@ -129,7 +129,15 @@
+       <option name="project" value="LOCAL" />
+       <updated>1736366110482</updated>
+     </task>
+-    <option name="localTasksCounter" value="2" />
++    <task id="LOCAL-00002" summary="al treilea commit!">
++      <option name="closed" value="true" />
++      <created>1736372943554</created>
++      <option name="number" value="00002" />
++      <option name="presentableId" value="LOCAL-00002" />
++      <option name="project" value="LOCAL" />
++      <updated>1736372943554</updated>
++    </task>
++    <option name="localTasksCounter" value="3" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+@@ -137,6 +145,17 @@
+   </component>
+   <component name="VcsManagerConfiguration">
+     <MESSAGE value="Al doilea commit!" />
+-    <option name="LAST_COMMIT_MESSAGE" value="Al doilea commit!" />
++    <MESSAGE value="al treilea commit!" />
++    <option name="LAST_COMMIT_MESSAGE" value="al treilea commit!" />
++  </component>
++  <component name="XDebuggerManager">
++    <breakpoint-manager>
++      <breakpoints>
++        <breakpoint enabled="true" type="java-exception">
++          <properties class="org.hibernate.hql.internal.ast.QuerySyntaxException" package="org.hibernate.hql.internal.ast" />
++          <option name="timeStamp" value="6" />
++        </breakpoint>
++      </breakpoints>
++    </breakpoint-manager>
+   </component>
+ </project>
+\ No newline at end of file
+Index: src/main/java/org/example/entities/Member.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example.entities;\r\n\r\nimport lombok.*;\r\n\r\nimport javax.persistence.*;\r\nimport java.util.List;\r\nimport java.util.Set;\r\n\r\n@Entity\r\n@Table(name = \"Member\")\r\n@NoArgsConstructor\r\n@AllArgsConstructor\r\n@Builder\r\n@Getter\r\n@Setter\r\npublic class Member {\r\n\r\n    @Id\r\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\r\n    private int id;\r\n\r\n    private String firstName;\r\n\r\n    private String lastName;\r\n\r\n    private String membershipType;\r\n\r\n    @ManyToMany(mappedBy = \"members\",fetch = FetchType.EAGER)\r\n    private List<TrainingSession> trainingSessions;\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/org/example/entities/Member.java b/src/main/java/org/example/entities/Member.java
+--- a/src/main/java/org/example/entities/Member.java	(revision c3c9e0c22419470cd50bfc2f3146a1a91876180b)
++++ b/src/main/java/org/example/entities/Member.java	(date 1736380970400)
+@@ -28,4 +28,10 @@
+     @ManyToMany(mappedBy = "members",fetch = FetchType.EAGER)
+     private List<TrainingSession> trainingSessions;
+ 
++    @OneToOne(mappedBy = "member")
++    private Subscription subscription;
++
++    @OneToMany(mappedBy = "member")
++    private List<Progress>progressList;
++
+ }
+Index: src/main/resources/hibernate.cfg.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><!DOCTYPE hibernate-configuration PUBLIC\r\n        \"-//Hibernate/Hibernate Configuration DTD 3.0//EN\"\r\n        \"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd\">\r\n<hibernate-configuration>\r\n    <session-factory>\r\n        <property name=\"connection.driver_class\">com.mysql.cj.jdbc.Driver</property>\r\n        <property name=\"connection.url\">jdbc:mysql://localhost:3306/GymManagementSystem?createDatabaseIfNotExist=true</property>\r\n        <property name=\"connection.username\">root</property>\r\n        <property name=\"connection.password\">password</property>\r\n        <property name=\"dialect\">org.hibernate.dialect.MySQL8Dialect</property>\r\n        <property name=\"show_sql\">true</property>\r\n        <property name=\"hbm2ddl.auto\">update</property>\r\n        <mapping class=\"org.example.entities.Member\"/>\r\n        <mapping class=\"org.example.entities.Trainer\"/>\r\n        <mapping class=\"org.example.entities.TrainingSession\"/>\r\n\r\n\r\n    </session-factory>\r\n</hibernate-configuration>\r\n\r\n\r\n\r\n\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/hibernate.cfg.xml b/src/main/resources/hibernate.cfg.xml
+--- a/src/main/resources/hibernate.cfg.xml	(revision c3c9e0c22419470cd50bfc2f3146a1a91876180b)
++++ b/src/main/resources/hibernate.cfg.xml	(date 1736441661712)
+@@ -9,10 +9,12 @@
+         <property name="connection.password">password</property>
+         <property name="dialect">org.hibernate.dialect.MySQL8Dialect</property>
+         <property name="show_sql">true</property>
+-        <property name="hbm2ddl.auto">update</property>
++        <property name="hbm2ddl.auto">create</property>
+         <mapping class="org.example.entities.Member"/>
+         <mapping class="org.example.entities.Trainer"/>
+         <mapping class="org.example.entities.TrainingSession"/>
++        <mapping class="org.example.entities.Subscription"/>
++        <mapping class="org.example.entities.Progress"/>
+ 
+ 
+     </session-factory>
+Index: src/main/java/org/example/Main.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example;\r\n\r\nimport org.example.repositories.MemberRepository;\r\nimport org.example.repositories.TrainerRepository;\r\nimport org.example.repositories.TrainingSessionRepository;\r\nimport org.example.util.GymCli;\r\n\r\npublic class Main {\r\n    private static final MemberRepository memberRepository = new MemberRepository();\r\n    private static final TrainerRepository trainerRepository = new TrainerRepository();\r\n    private static final TrainingSessionRepository trainingSessionRepository = new TrainingSessionRepository();\r\n\r\n    private static final GymCli gymCli =new GymCli(memberRepository,trainerRepository,trainingSessionRepository);\r\n    public static void main(String[] args) {\r\n\r\n        gymCli.start();\r\n\r\n\r\n\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/org/example/Main.java b/src/main/java/org/example/Main.java
+--- a/src/main/java/org/example/Main.java	(revision c3c9e0c22419470cd50bfc2f3146a1a91876180b)
++++ b/src/main/java/org/example/Main.java	(date 1736378948185)
+@@ -1,6 +1,8 @@
+ package org.example;
+ 
++import org.example.entities.Progress;
+ import org.example.repositories.MemberRepository;
++import org.example.repositories.SubscriptionRepository;
+ import org.example.repositories.TrainerRepository;
+ import org.example.repositories.TrainingSessionRepository;
+ import org.example.util.GymCli;
+@@ -9,13 +11,15 @@
+     private static final MemberRepository memberRepository = new MemberRepository();
+     private static final TrainerRepository trainerRepository = new TrainerRepository();
+     private static final TrainingSessionRepository trainingSessionRepository = new TrainingSessionRepository();
++    private static final Progress progress = new Progress();
++    private static final SubscriptionRepository subscriptionRepository = new SubscriptionRepository();
+ 
+-    private static final GymCli gymCli =new GymCli(memberRepository,trainerRepository,trainingSessionRepository);
++    private static final GymCli gymCli = new GymCli(memberRepository, trainerRepository, trainingSessionRepository, subscriptionRepository, progress);
++
+     public static void main(String[] args) {
+ 
+         gymCli.start();
+ 
+ 
+-
+     }
+ }
+\ No newline at end of file

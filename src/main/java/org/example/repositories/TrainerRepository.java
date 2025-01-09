@@ -26,6 +26,16 @@ public class TrainerRepository {
         return tempTrainer;
     }
 
+    public Trainer getTrainerSessionById(int id){
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        Trainer tempTrainer = session.get(Trainer.class, id);
+        tempTrainer.getTrainingSessions().stream().forEach(System.out::println);
+        session.getTransaction().commit();
+        session.close();
+        return tempTrainer;
+    }
+
     public void updateTrainer(Trainer trainer){
         Session session = sessionFactory.openSession();
         session.beginTransaction();
