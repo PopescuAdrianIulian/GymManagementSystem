@@ -26,6 +26,6 @@ public class Trainer {
     private String specialization;
 
 
-    @OneToMany(mappedBy = "trainer", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "trainer")
     private List<TrainingSession> trainingSessions;
 }

@@ -298,11 +298,12 @@ public class GymCli {
         scanner.nextLine();
 
         Member member = memberRepository.getMemberById(memberId);
-        TrainingSession session = trainingSessionRepository.getTrainingSessionById(sessionId);
 
-        if (member != null && session != null) {
-            session.getMembers().add(member);
-            trainingSessionRepository.updateTrainingSession(session);
+        if (member != null ) {
+            TrainingSession session = trainingSessionRepository.addNewMemberToTrainingSessionById(sessionId, member);
+            if(session != null){
+                trainingSessionRepository.updateTrainingSession(session);
+            }
             System.out.println("Member enrolled successfully!");
         } else {
             throw new TrainingSessionNotFoundException();

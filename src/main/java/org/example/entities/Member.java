@@ -25,7 +25,7 @@ public class Member {
 
     private String membershipType;
 
-    @ManyToMany(mappedBy = "members",fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "members")
     private List<TrainingSession> trainingSessions;
 
 }
