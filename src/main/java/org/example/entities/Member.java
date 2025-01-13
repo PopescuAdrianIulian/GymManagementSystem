@@ -32,6 +32,8 @@ public class Member {
     private Subscription subscription;
 
     @OneToMany(mappedBy = "member")
-    private List<Progress>progressList;
+    private List<Progress> progressList;
 
+    @OneToMany(mappedBy = "member")
+    private List<Reservation> reservationList;
 }

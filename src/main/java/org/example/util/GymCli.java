@@ -7,6 +7,7 @@ import org.example.exceptions.TrainerNotFoundException;
 import org.example.exceptions.TrainingSessionNotFoundException;
 import org.example.repositories.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Scanner;
@@ -17,6 +18,8 @@ public class GymCli {
     private static final TrainingSessionRepository trainingSessionRepository = new TrainingSessionRepository();
     private static final ProgressRepository progressRepository = new ProgressRepository();
     private static final SubscriptionRepository subscriptionRepository = new SubscriptionRepository();
+    private static final EquipmentRepository equipmentRepository = new EquipmentRepository();
+    private static final ReservationRepository reservationRepository = new ReservationRepository();
 
     public GymCli() {
     }
@@ -28,7 +31,8 @@ public class GymCli {
             System.out.println("1. Manage Members");
             System.out.println("2. Manage Trainers");
             System.out.println("3. Manage Training Sessions");
-            System.out.println("4. Exit");
+            System.out.println("4. Manage Equipment");
+            System.out.println("5. Exit");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -44,6 +48,9 @@ public class GymCli {
                     manageTrainingSession(scanner);
                     break;
                 case 4:
+                    manageEquipment(scanner);
+                    break;
+                case 5:
                     System.out.println("CLI stopping");
                     scanner.close();
                     return;
@@ -52,6 +59,163 @@ public class GymCli {
                     break;
             }
         }
+    }
+
+    private void manageEquipment(Scanner scanner) {
+        System.out.println("Equipment Management");
+        System.out.println("1. Add new equipment");
+        System.out.println("2. Reserve Equipment");
+        System.out.println("3. Check equipment availability");
+        System.out.println("4. List all equipment ");
+        System.out.println("5. Mark equipment under maintenance");
+        System.out.println("6. Mark equipment not under maintenance");
+        System.out.println("7. Check equipment reservations");
+        System.out.println("8. Back");
+        System.out.print("Choose an option: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        switch (choice) {
+            case 1:
+                addEquipment(scanner);
+                break;
+            case 2:
+                reserveEquipment(scanner);
+                break;
+            case 3:
+                checkEquipmentAvailability(scanner);
+                break;
+            case 4:
+                listEquipment(scanner);
+                break;
+            case 5:
+                markEquipmentMaintenance(scanner);
+                break;
+            case 6:
+                markEquipmentNotInMaintenance(scanner);
+                break;
+                case 7:
+                checkEquipmentReservations(scanner);
+                break;
+            case 8:
+                return;
+            default:
+                System.out.println("Invalid choice!");
+                break;
+        }
+    }
+
+    private void checkEquipmentReservations(Scanner scanner) {
+        System.out.println("Enter equipment id");
+        int equipmentId = scanner.nextInt();
+        scanner.nextLine();
+        Equipment tempEquipment = equipmentRepository.getEquipmentById(equipmentId);
+        List<Reservation>reservationList=equipmentRepository.getEquipmentReservationById(equipmentId);
+        for (Reservation reservation:reservationList){
+            System.out.println(reservation);
+        }
+    }
+
+    private void markEquipmentMaintenance(Scanner scanner) {
+        System.out.println("Enter equipment id");
+        int equipmentId = scanner.nextInt();
+        scanner.nextLine();
+        Equipment tempEquipment = equipmentRepository.getEquipmentById(equipmentId);
+        tempEquipment.setMaintenanceDate(LocalDate.now());
+        equipmentRepository.updateEquipment(tempEquipment);
+        System.out.println("Equipment is under Maintenance");
+    }
+
+    private void markEquipmentNotInMaintenance(Scanner scanner) {
+        System.out.println("Enter equipment id");
+        int equipmentId = scanner.nextInt();
+        scanner.nextLine();
+        Equipment tempEquipment = equipmentRepository.getEquipmentById(equipmentId);
+        tempEquipment.setMaintenanceDate(null);
+        equipmentRepository.updateEquipment(tempEquipment);
+        System.out.println("Equipment is not in Maintenance");
+    }
+
+    private void listEquipment(Scanner scanner) {
+        List<Equipment> equipmentList = equipmentRepository.getAllEquipment();
+        System.out.println("All equipment ");
+        for (Equipment equipment : equipmentList) {
+            System.out.println(equipment);
+        }
+    }
+
+    private void checkEquipmentAvailability(Scanner scanner) {
+        System.out.println("Enter equipment id");
+        int equipmentId = scanner.nextInt();
+        scanner.nextLine();
+        Equipment tempEquipment = equipmentRepository.getEquipmentById(equipmentId);
+        if (tempEquipment.getStatus() == StatusEnum.Available && tempEquipment.getMaintenanceDate() == null) {
+            System.out.println("Equipment available!");
+        } else if (tempEquipment.getMaintenanceDate() != null) {
+            System.out.println("Equipment under maintanance");
+        } else {
+            System.out.println("Equipment unavailable");
+        }
+    }
+
+
+    private void reserveEquipment(Scanner scanner) {
+        System.out.println("Member id:");
+        int memberId = scanner.nextInt();
+        scanner.nextLine();
+        Member tempMember = memberRepository.getMemberById(memberId);
+        if (tempMember == null) {
+            throw new MemberNotFoundException();
+        } else {
+
+            List<Equipment> equipmentList = equipmentRepository.getAllEquipment();
+            System.out.println("All equipment ");
+            for (Equipment equipment : equipmentList) {
+                System.out.println(equipment);
+            }
+            System.out.println("Select the equipment by id ");
+            int equipmentId = scanner.nextInt();
+            scanner.nextLine();
+            Equipment tempEquipment = equipmentRepository.getEquipmentById(equipmentId);
+            if (tempEquipment == null || tempEquipment.getMaintenanceDate() != null) {
+                System.out.println("Equipment not found or under maintenance");
+            } else {
+
+                if (tempEquipment.getStatus() == StatusEnum.Unavailabe) {
+                    System.out.println("The equipment is unavailable");
+                } else {
+                    tempEquipment.setStatus(StatusEnum.Unavailabe);
+                    System.out.println("Duration:");
+                    int duration = scanner.nextInt();
+                    scanner.nextLine();
+
+                    Reservation reservation = new Reservation();
+                    reservation.setMember(tempMember);
+                    reservation.setDuration(duration);
+                    reservation.setEquipment(tempEquipment);
+                    reservation.setEquipmentId(equipmentId);
+                    reservation.setMemberId(memberId);
+                    reservation.setReservationDate(LocalDate.now());
+
+                    reservationRepository.createReservation(reservation);
+                    equipmentRepository.updateEquipment(tempEquipment);
+                    System.out.println("Equipment reserved");
+                }
+            }
+        }
+    }
+
+    private void addEquipment(Scanner scanner) {
+        System.out.println("Equipment name: ");
+        String equipmentName = scanner.nextLine();
+
+
+        Equipment tempEquipment = new Equipment();
+        tempEquipment.setName(equipmentName);
+        tempEquipment.setStatus(StatusEnum.Available);
+
+        equipmentRepository.createEquipment(tempEquipment);
+        System.out.println("Equipment added successfully!");
     }
 
     private void manageTrainingSession(Scanner scanner) {
@@ -285,14 +449,16 @@ public class GymCli {
         System.out.println("Enter Member ID: ");
         int memberId = scanner.nextInt();
         scanner.nextLine();
-
-        List<Progress> progressList = memberRepository.getMemberProgressById(memberId);
-        for (Progress p : progressList) {
-            System.out.println("Data: " + p.getDate());
-            System.out.println("Weight: " + p.getWeight());
-            System.out.println("Body fat: " + p.getBodyFatPercentage());
+        if (memberRepository.getMemberById(memberId) != null) {
+            List<Progress> progressList = memberRepository.getMemberProgressById(memberId);
+            for (Progress p : progressList) {
+                System.out.println("Data: " + p.getDate());
+                System.out.println("Weight: " + p.getWeight());
+                System.out.println("Body fat: " + p.getBodyFatPercentage());
+            }
+        } else {
+            throw new MemberNotFoundException();
         }
-
     }
 
     private void addProgress(Scanner scanner) {
@@ -300,33 +466,37 @@ public class GymCli {
         int memberId = scanner.nextInt();
         scanner.nextLine();
 
-
-        System.out.println("Enter Date");
-        String date = scanner.nextLine();
-
-        System.out.println("Enter weight");
-        int weight = scanner.nextInt();
-        scanner.nextLine();
-
-        System.out.println("Enter body fat ");
-        int bf = scanner.nextInt();
-        scanner.nextLine();
-
-        Progress tempProgress = new Progress();
-        tempProgress.setDate(date);
-        tempProgress.setWeight(weight);
-        tempProgress.setBodyFatPercentage(bf);
+        if (memberRepository.getMemberById(memberId) != null) {
 
 
-        Member tempMember = memberRepository.addProgressToMemberById(memberId, tempProgress);
-        if (tempMember == null) {
+            System.out.println("Enter Date");
+            String date = scanner.nextLine();
+
+            System.out.println("Enter weight");
+            int weight = scanner.nextInt();
+            scanner.nextLine();
+
+            System.out.println("Enter body fat ");
+            int bf = scanner.nextInt();
+            scanner.nextLine();
+
+            Progress tempProgress = new Progress();
+            tempProgress.setDate(date);
+            tempProgress.setWeight(weight);
+            tempProgress.setBodyFatPercentage(bf);
+
+
+            Member tempMember = memberRepository.addProgressToMemberById(memberId, tempProgress);
+            if (tempMember == null) {
+                throw new MemberNotFoundException();
+            }
+            tempProgress.setMember(tempMember);
+            progressRepository.createProgress(tempProgress);
+            memberRepository.updateMember(tempMember);
+            System.out.println("Subscription added successfully!");
+        } else {
             throw new MemberNotFoundException();
         }
-        tempProgress.setMember(tempMember);
-        progressRepository.createProgress(tempProgress);
-        memberRepository.updateMember(tempMember);
-        System.out.println("Subscription added successfully!");
-
     }
 
     private void checkSubscription(Scanner scanner) {
