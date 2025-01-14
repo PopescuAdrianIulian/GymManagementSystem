@@ -2,9 +2,8 @@ package org.example.util;
 
 
 import org.example.entities.*;
-import org.example.exceptions.MemberNotFoundException;
-import org.example.exceptions.TrainerNotFoundException;
-import org.example.exceptions.TrainingSessionNotFoundException;
+import org.example.enumeration.StatusEnum;
+import org.example.exceptions.*;
 import org.example.repositories.*;
 
 import java.time.LocalDate;
@@ -94,7 +93,7 @@ public class GymCli {
             case 6:
                 markEquipmentNotInMaintenance(scanner);
                 break;
-                case 7:
+            case 7:
                 checkEquipmentReservations(scanner);
                 break;
             case 8:
@@ -110,9 +109,17 @@ public class GymCli {
         int equipmentId = scanner.nextInt();
         scanner.nextLine();
         Equipment tempEquipment = equipmentRepository.getEquipmentById(equipmentId);
-        List<Reservation>reservationList=equipmentRepository.getEquipmentReservationById(equipmentId);
-        for (Reservation reservation:reservationList){
-            System.out.println(reservation);
+        if (tempEquipment == null) {
+            throw new EquipmentNotFoundException();
+        } else {
+            List<Reservation> reservationList = equipmentRepository.getEquipmentReservationById(equipmentId);
+            if (reservationList == null) {
+                throw new ReservationNotFoundException();
+            } else {
+                for (Reservation reservation : reservationList) {
+                    System.out.println(reservation);
+                }
+            }
         }
     }
 
@@ -149,15 +156,18 @@ public class GymCli {
         int equipmentId = scanner.nextInt();
         scanner.nextLine();
         Equipment tempEquipment = equipmentRepository.getEquipmentById(equipmentId);
-        if (tempEquipment.getStatus() == StatusEnum.Available && tempEquipment.getMaintenanceDate() == null) {
-            System.out.println("Equipment available!");
-        } else if (tempEquipment.getMaintenanceDate() != null) {
-            System.out.println("Equipment under maintanance");
+        if (tempEquipment == null) {
+            throw new EquipmentNotFoundException();
         } else {
-            System.out.println("Equipment unavailable");
+            if (tempEquipment.getStatus() == StatusEnum.Available && tempEquipment.getMaintenanceDate() == null) {
+                System.out.println("Equipment available!");
+            } else if (tempEquipment.getMaintenanceDate() != null) {
+                System.out.println("Equipment under maintanance");
+            } else {
+                System.out.println("Equipment unavailable");
+            }
         }
     }
-
 
     private void reserveEquipment(Scanner scanner) {
         System.out.println("Member id:");

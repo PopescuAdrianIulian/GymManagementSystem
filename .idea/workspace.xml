@@ -6,9 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="0216f41c-2083-42ec-a0d0-4aec0e4bab6e" name="Changes" comment="al patrulea commit!">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/entities/Member.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/entities/Member.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/repositories/EquipmentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/repositories/EquipmentRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/repositories/ReservationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/repositories/ReservationRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/util/GymCli.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/util/GymCli.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,9 +18,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Exception" />
-        <option value="Class" />
         <option value="Enum" />
+        <option value="Class" />
+        <option value="Exception" />
       </list>
     </option>
   </component>
@@ -123,6 +123,7 @@
       <workItem from="1736442454957" duration="7706000" />
       <workItem from="1736615243253" duration="3215000" />
       <workItem from="1736784935874" duration="4512000" />
+      <workItem from="1736871899648" duration="784000" />
     </task>
     <task id="LOCAL-00001" summary="Al doilea commit!">
       <option name="closed" value="true" />

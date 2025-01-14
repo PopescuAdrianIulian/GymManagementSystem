@@ -57,11 +57,12 @@ public class EquipmentRepository {
         session.close();
         return equipmentList;
     }
+
     public List<Reservation> getEquipmentReservationById(int id) {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
         Equipment equipment = session.get(Equipment.class, id);
-        List<Reservation>reservationList=equipment.getReservationList().stream().toList();
+        List<Reservation> reservationList = equipment.getReservationList().stream().toList();
         session.getTransaction().commit();
         session.close();
         return reservationList;
