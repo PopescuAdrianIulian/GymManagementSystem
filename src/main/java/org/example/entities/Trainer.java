@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "Trainer")
+@Table(name = "Trainers")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

@@ -3,6 +3,7 @@ package org.example.repositories;
 import org.example.entities.Member;
 import org.example.entities.Progress;
 import org.example.util.HibernateUti;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
@@ -23,6 +24,7 @@ public class MemberRepository {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
         Member tempMember = session.get(Member.class, id);
+        Hibernate.initialize(tempMember.getReservationList());
         session.getTransaction().commit();
         session.close();
         return tempMember;
@@ -86,6 +88,17 @@ public class MemberRepository {
         session.delete(member);
         session.getTransaction().commit();
         session.close();
+    }
+
+    public List<Progress> getMemberProgress(Member member) {
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        Member tempMember = (Member) session.merge(member);
+        List<Progress> progressList = tempMember.getProgressList().stream().toList();
+
+        session.getTransaction().commit();
+        session.close();
+        return progressList;
     }
 
 }

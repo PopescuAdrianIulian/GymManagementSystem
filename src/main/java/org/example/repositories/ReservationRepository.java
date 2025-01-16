@@ -1,5 +1,6 @@
 package org.example.repositories;
 
+import org.example.entities.Equipment;
 import org.example.entities.Progress;
 import org.example.entities.Reservation;
 import org.example.util.HibernateUti;
@@ -43,6 +44,7 @@ public class ReservationRepository {
         session.getTransaction().commit();
         session.close();
     }
+
 
 
 }

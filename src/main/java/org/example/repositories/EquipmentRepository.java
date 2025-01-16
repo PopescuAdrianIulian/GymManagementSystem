@@ -4,6 +4,7 @@ import org.example.entities.Equipment;
 import org.example.entities.Progress;
 import org.example.entities.Reservation;
 import org.example.util.HibernateUti;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -26,6 +27,7 @@ public class EquipmentRepository {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
         Equipment equipment = session.get(Equipment.class, id);
+        Hibernate.initialize(equipment.getReservationList());
         session.getTransaction().commit();
         session.close();
         return equipment;
@@ -67,4 +69,16 @@ public class EquipmentRepository {
         session.close();
         return reservationList;
     }
+
+    public List<Reservation> getReservationByEquipment(Equipment equipment) {
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        Equipment tempEquipment = (Equipment) session.merge(equipment);
+        List<Reservation>reservationList=tempEquipment.getReservationList().stream().toList();
+
+        session.getTransaction().commit();
+        session.close();
+        return reservationList;
+    }
+
 }

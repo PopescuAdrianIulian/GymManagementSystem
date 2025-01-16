@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 //id: ID unic pentru fiecare rezervare.
 //equipmentId: ID-ul echipamentului rezervat.
@@ -24,8 +25,9 @@ public class Reservation {
     private int id;
     private int equipmentId;
     private int memberId;
-    private LocalDate reservationDate;
+    private LocalDateTime reservationDate;
     private int duration;
+    private LocalDateTime reservationEnd;
 
     @ManyToOne
     @JoinColumn(name = "equipment_id")
@@ -43,8 +45,7 @@ public class Reservation {
                 ", memberId=" + memberId +
                 ", reservationDate=" + reservationDate +
                 ", duration=" + duration +
-                ", equipment=" + equipment +
-                ", member=" + member +
+                ", reservationEnd=" + reservationEnd +
                 '}';
     }
 }

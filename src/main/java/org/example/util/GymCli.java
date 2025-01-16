@@ -8,6 +8,7 @@ import org.example.repositories.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 
@@ -69,7 +70,8 @@ public class GymCli {
         System.out.println("5. Mark equipment under maintenance");
         System.out.println("6. Mark equipment not under maintenance");
         System.out.println("7. Check equipment reservations");
-        System.out.println("8. Back");
+        System.out.println("8. View all reservations");
+        System.out.println("9. Back");
         System.out.print("Choose an option: ");
         int choice = scanner.nextInt();
         scanner.nextLine();
@@ -97,10 +99,37 @@ public class GymCli {
                 checkEquipmentReservations(scanner);
                 break;
             case 8:
+                viewAllReservations(scanner);
+                break;
+            case 9:
                 return;
             default:
                 System.out.println("Invalid choice!");
                 break;
+        }
+    }
+
+    private void viewAllReservations(Scanner scanner) {
+        System.out.println("Getting all reservations...");
+
+        List<Equipment> equipmentList = equipmentRepository.getAllEquipment();
+
+        if (equipmentList.isEmpty()) {
+            System.out.println("No equipment found.");
+            return;
+        }
+
+        for (Equipment equipment : equipmentList) {
+            System.out.println("Reservations for Equipment: " + equipment.getName());
+
+            List<Reservation> reservations = equipmentRepository.getReservationByEquipment(equipment);
+            if (reservations.isEmpty()) {
+                System.out.println("No reservations for this equipment.");
+            } else {
+                for (Reservation reservation : reservations) {
+                    System.out.println(reservation);
+                }
+            }
         }
     }
 
@@ -152,19 +181,30 @@ public class GymCli {
     }
 
     private void checkEquipmentAvailability(Scanner scanner) {
-        System.out.println("Enter equipment id");
+        System.out.println("Enter equipment id:");
         int equipmentId = scanner.nextInt();
         scanner.nextLine();
         Equipment tempEquipment = equipmentRepository.getEquipmentById(equipmentId);
         if (tempEquipment == null) {
             throw new EquipmentNotFoundException();
         } else {
+
             if (tempEquipment.getStatus() == StatusEnum.Available && tempEquipment.getMaintenanceDate() == null) {
                 System.out.println("Equipment available!");
             } else if (tempEquipment.getMaintenanceDate() != null) {
-                System.out.println("Equipment under maintanance");
+                System.out.println("Equipment under maintenance");
             } else {
                 System.out.println("Equipment unavailable");
+            }
+
+            List<Reservation> reservations = tempEquipment.getReservationList();
+            if (reservations.isEmpty()) {
+                System.out.println("No reservations found for this equipment.");
+            } else {
+                System.out.println("Reservations for this equipment:");
+                for (Reservation reservation : reservations) {
+                    System.out.println(reservation);
+                }
             }
         }
     }
@@ -177,40 +217,55 @@ public class GymCli {
         if (tempMember == null) {
             throw new MemberNotFoundException();
         } else {
-
             List<Equipment> equipmentList = equipmentRepository.getAllEquipment();
-            System.out.println("All equipment ");
+            System.out.println("All equipment:");
             for (Equipment equipment : equipmentList) {
                 System.out.println(equipment);
             }
-            System.out.println("Select the equipment by id ");
+            System.out.println("Select the equipment by id:");
             int equipmentId = scanner.nextInt();
             scanner.nextLine();
             Equipment tempEquipment = equipmentRepository.getEquipmentById(equipmentId);
             if (tempEquipment == null || tempEquipment.getMaintenanceDate() != null) {
-                System.out.println("Equipment not found or under maintenance");
+                System.out.println("Equipment not found or under maintenance.");
             } else {
+                System.out.println("The date (format: yyyy-MM-dd HH:mm):");
+                String date = scanner.nextLine();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                List<Reservation> reservations = tempEquipment.getReservationList();
+                LocalDateTime reservationDate = LocalDateTime.parse(date, formatter);
 
-                if (tempEquipment.getStatus() == StatusEnum.Unavailabe) {
-                    System.out.println("The equipment is unavailable");
-                } else {
-                    tempEquipment.setStatus(StatusEnum.Unavailabe);
-                    System.out.println("Duration:");
-                    int duration = scanner.nextInt();
-                    scanner.nextLine();
+                System.out.println("Duration:");
+                int duration = scanner.nextInt();
+                scanner.nextLine();
 
-                    Reservation reservation = new Reservation();
-                    reservation.setMember(tempMember);
-                    reservation.setDuration(duration);
-                    reservation.setEquipment(tempEquipment);
-                    reservation.setEquipmentId(equipmentId);
-                    reservation.setMemberId(memberId);
-                    reservation.setReservationDate(LocalDate.now());
+                LocalDateTime reservationEnd = reservationDate.plusMinutes(duration);
+                boolean isConflict = false;
 
-                    reservationRepository.createReservation(reservation);
-                    equipmentRepository.updateEquipment(tempEquipment);
-                    System.out.println("Equipment reserved");
+                for (Reservation reservation : reservations) {
+                    LocalDateTime existingStart = reservation.getReservationDate();
+                    LocalDateTime existingEnd = reservation.getReservationEnd();
+
+                    if (!(reservationEnd.isBefore(existingStart) || reservationDate.isAfter(existingEnd))) {
+                        isConflict = true;
+                        break;
+                    }
                 }
+                if (isConflict) {
+                    System.out.println("Another reservation exists at the same time for this equipment.");
+                    return;
+                }
+                Reservation tempReservation = new Reservation();
+                tempReservation.setMember(tempMember);
+                tempReservation.setDuration(duration);
+                tempReservation.setEquipment(tempEquipment);
+                tempReservation.setEquipmentId(equipmentId);
+                tempReservation.setMemberId(memberId);
+                tempReservation.setReservationDate(reservationDate);
+                tempReservation.setReservationEnd(reservationEnd);
+                reservationRepository.createReservation(tempReservation);
+                equipmentRepository.updateEquipment(tempEquipment);
+                System.out.println("Equipment reserved.");
             }
         }
     }
@@ -268,7 +323,7 @@ public class GymCli {
         System.out.println("Enter Session ID:");
         int sesionId = scanner.nextInt();
         scanner.nextLine();
-        TrainingSession trainingSession = trainingSessionRepository.getTrainingSessionById(sesionId);
+        TrainingSession trainingSession = trainingSessionRepository.getMembersInTrainingSessionById(sesionId);
 
         if (trainingSession != null) {
             System.out.println("Members for " + trainingSession.getSessionName());
@@ -411,7 +466,8 @@ public class GymCli {
         System.out.println("8. Check Subscription");
         System.out.println("9. Add Progress");
         System.out.println("10. Check Progress");
-        System.out.println("11. Back");
+        System.out.println("11. View member reservations");
+        System.out.println("12. Back");
         System.out.print("Choose an option: ");
         int choice = scanner.nextInt();
         scanner.nextLine();
@@ -448,6 +504,9 @@ public class GymCli {
                 checkProgress(scanner);
                 break;
             case 11:
+                getMemberReservations(scanner);
+                break;
+            case 12:
                 return;
             default:
                 System.out.println("Invalid choice!");
@@ -455,12 +514,38 @@ public class GymCli {
         }
     }
 
+    private void getMemberReservations(Scanner scanner) {
+        System.out.println("Enter member id:");
+        int memberId = scanner.nextInt();
+        scanner.nextLine();
+
+        Member tempMember = memberRepository.getMemberById(memberId);
+        if (tempMember == null) {
+            throw new MemberNotFoundException();
+        } else {
+            List<Reservation> reservations = tempMember.getReservationList();
+
+            if (reservations.isEmpty()) {
+                System.out.println("No reservations found for this member.");
+            } else {
+                System.out.println("Reservations for member " + tempMember.getFirstName());
+                for (Reservation reservation : reservations) {
+                    System.out.println(reservation);
+                }
+            }
+        }
+    }
+
     private void checkProgress(Scanner scanner) {
         System.out.println("Enter Member ID: ");
         int memberId = scanner.nextInt();
         scanner.nextLine();
-        if (memberRepository.getMemberById(memberId) != null) {
-            List<Progress> progressList = memberRepository.getMemberProgressById(memberId);
+        Member tempMember = memberRepository.getMemberById(memberId);
+        if (tempMember != null) {
+            List<Progress> progressList = memberRepository.getMemberProgress(tempMember);
+            if (progressList == null || progressList.isEmpty()) {
+                System.out.println("Progress not found");
+            }
             for (Progress p : progressList) {
                 System.out.println("Data: " + p.getDate());
                 System.out.println("Weight: " + p.getWeight());
@@ -503,7 +588,7 @@ public class GymCli {
             tempProgress.setMember(tempMember);
             progressRepository.createProgress(tempProgress);
             memberRepository.updateMember(tempMember);
-            System.out.println("Subscription added successfully!");
+            System.out.println("Progress added successfully!");
         } else {
             throw new MemberNotFoundException();
         }
@@ -521,7 +606,7 @@ public class GymCli {
         Member tempMember2 = memberRepository.getMemberSubscriptionById(memberId);
         Subscription subscription = tempMember2.getSubscription();
 
-        if (tempMember2 == null) {
+        if (tempMember2 == null || subscription == null) {
             System.out.println("No subscription found for this member.");
             return;
         }

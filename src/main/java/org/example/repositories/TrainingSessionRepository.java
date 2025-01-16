@@ -4,8 +4,11 @@ import org.example.entities.Member;
 import org.example.entities.Trainer;
 import org.example.entities.TrainingSession;
 import org.example.util.HibernateUti;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+
+import java.util.List;
 
 public class TrainingSessionRepository {
     private SessionFactory sessionFactory = HibernateUti.getSessionFactory();
@@ -51,6 +54,16 @@ public class TrainingSessionRepository {
         session.delete(trainingSession);
         session.getTransaction().commit();
         session.close();
+    }
+
+    public TrainingSession getMembersInTrainingSessionById(int id) {
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        TrainingSession tempTrainingSession = session.get(TrainingSession.class, id);
+        Hibernate.initialize(tempTrainingSession.getMembers());
+        session.getTransaction().commit();
+        session.close();
+        return tempTrainingSession;
     }
 
 }
